@@ -8,6 +8,8 @@ import {Logout} from '../slices/authSlice'
 import { useNavigate } from 'react-router-dom';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import Loader from './Loader';
+import { useEffect, useState } from 'react';
 const Header = () => {
 
 
@@ -15,64 +17,70 @@ const Header = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const [logout ] = useLogoutMutation()
-
+  const [logoutDone, setLogoutDone] = useState(true)
    const logoutHandler = async () => {
+    
+
     try {
+      setLogoutDone(false)
     await logout().unwrap();
       dispatch(Logout());
-      navigate('/')
+      setLogoutDone(true)
     } catch(err)
     {
       console.log(err)
     }
   }
   return (
-    <header>
-          <Navbar bg='dark' variant='dark' expand='lg' collapseOnSelect >
-           <Container className='px-5 mx-2 py-3'>
-            <LinkContainer to='/'>
-              <Navbar.Brand>PeoplesLion</Navbar.Brand>
-            </LinkContainer>
-           
-             <Navbar.Toggle aria-controls='basic-navbar-nav' />
-             <Navbar.Collapse id='basic-navbar-nav'>
-             <Nav className="ms-auto">
+<>  {logoutDone ?   <header>
+    <Navbar bg='dark' variant='dark' expand='lg' collapseOnSelect >
+     <Container className='px-5 mx-2 py-3'>
+      <LinkContainer to='/'>
+        <Navbar.Brand>PeoplesLion</Navbar.Brand>
+      </LinkContainer>
+     
+       <Navbar.Toggle aria-controls='basic-navbar-nav' />
+       <Navbar.Collapse id='basic-navbar-nav'>
+       <Nav className="ms-auto">
+     
+
+             {userInfo ? (<>
+             
+             <NavDropdown title={userInfo.name.toUpperCase() } id='username'>
+                       
+                    <LinkContainer to='/dashboard'>
+                        <NavDropdown.Item>
+                    
+                        <AdminPanelSettingsIcon/>  officer Dashboard
+                        </NavDropdown.Item>
+                    </LinkContainer>
+         
            
 
-                   {userInfo ? (<>
-                   
-                   <NavDropdown title={userInfo.name.toUpperCase() } id='username'>
-                             
-                          <LinkContainer to='/dashboard'>
-                              <NavDropdown.Item>
-                          
-                              <AdminPanelSettingsIcon/>  officer Dashboard
-                              </NavDropdown.Item>
-                          </LinkContainer>
-               
-                 
-      
-                              <NavDropdown.Item onClick={logoutHandler}>
-                                <LogoutIcon/>
-                                Logout
-                              </NavDropdown.Item>
-                        </NavDropdown>    </>):(<>
-                          <LinkContainer to='/login'>
-                        <Nav.Link>
-                        <FaSignInAlt/>
-                          <span className='p-2'>Log in</span>  
-                        </Nav.Link>
-                        </LinkContainer>
-                 
-                              </>)}
-              
-         
-      
-             </Nav>
-        </Navbar.Collapse>
-           </Container>
-          </Navbar>
-    </header>
+                        <NavDropdown.Item onClick={logoutHandler}>
+                          <LogoutIcon/>
+                          Logout
+                        </NavDropdown.Item>
+                  </NavDropdown>    </>):(<>
+                    <LinkContainer to='/login'>
+                  <Nav.Link>
+                  <FaSignInAlt/>
+                    <span className='p-2'>Log in</span>  
+                  </Nav.Link>
+                  </LinkContainer>
+           
+                        </>)}
+        
+   
+
+       </Nav>
+  </Navbar.Collapse>
+     </Container>
+    </Navbar>
+</header> : <Loader/>}
+</>
+
+  
   )
 }
 
