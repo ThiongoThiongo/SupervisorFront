@@ -16,7 +16,18 @@ import Modal from '@mui/material/Modal';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import Loader from '../components/Loader';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import ListIcon from '@mui/icons-material/List';
+import CloseIcon from '@mui/icons-material/Close';
+import {
+  useWindowSize,
 
+} from '@react-hook/window-size'
+
+import Credits from './Credits';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
+import '../css/Agents.css'
 
 const style = {
     position: 'absolute',
@@ -64,8 +75,56 @@ const Dashboard = (props) => {
     })
    
 
+ const [view, setView] = useState('accounts');
+ const [showMenu, setShowMenu] = useState(true)
+ const toggleShowButton = ()=> {
+  setShowMenu(!showMenu)
+}
+const [width] = useWindowSize()
 
- 
+const getClassName = ()=> {
+
+  if(width > 750)
+  {
+    return 'left'
+  }
+  else if(width < 750 && showMenu)
+  {
+    return 'hide'
+  }
+  else{
+    return 'side'
+  }
+}
+const [loading, setLoading] = useState(false)
+const [credits, setCredits] = useState([])
+ const handleChange = (event, nextView) => {
+  setView(nextView);
+};
+
+useEffect(() => {
+  setLoading(true)
+  const fetchData = async () => {
+    try {
+      setLoading(false)
+
+      const response = await fetch('https://instacartbackend.onrender.com/api/agentRoute/forAgents',{ method:'GET', headers: {}
+    },  {credentials:'include'} );
+    
+      var fetchedData = await response.json();
+       
+         console.log(fetchedData)
+       setCredits(fetchedData);
+
+    } catch (error) {
+      setLoading(false)
+      console.log(error);
+    }
+  };
+
+  fetchData();
+}, []); 
+
    
         const fetchData = async () => {
           try {
@@ -194,8 +253,9 @@ const Dashboard = (props) => {
     const [selectedRemark, setSelectedRemark]
  = useState('')
    return (
-    <div className='centerAgent'>
+    <div className='main'>
 
+         <div className="centerAgent">
         <div className="modal">
         <Modal
         open={showConfirmation}
@@ -272,13 +332,59 @@ const Dashboard = (props) => {
 
       </Modal>
         </div>
+        <ToggleButtonGroup
+      orientation="vertical"
+      value={view}
+      exclusive
+      onChange={handleChange}
+    >
 
-        {instasAccountArray.length !== 0 || timer ? (<>     <div className="agentTable">
+      <ToggleButton onClick={toggleShowButton}  value="accounts" aria-label="accounts">
+        <SupervisorAccountIcon/>   <span className='mx-2'>Accounts Instacart</span> 
+      </ToggleButton>
+      <ToggleButton value="credits" onClick={toggleShowButton} aria-label="credits" className='my-2'>
+        <SupervisedUserCircleIcon/> <span className='mx-2'>Credits</span> 
+      </ToggleButton>
+      <ToggleButton value="upload" onClick={toggleShowButton} aria-label="upload" className='my-2'>
+        <SupervisedUserCircleIcon/> <span className='mx-2'>Upload Accounts</span> 
+      </ToggleButton>
+      
+    </ToggleButtonGroup>
+    {   width <  750 ? <>     {showMenu ? 
+           
+           <div className="icons"><Button
+              type='button'
+              variant='primary'
+              className='p-2'
+              onClick={()=>setShowMenu(!showMenu)}
+            >
+              <ListIcon/>
+            </Button>
+            </div>
+            :   <div className="iconsDelete"> <Button
+            type='button'
+            variant='danger'
+            className='p-2'
+            onClick={()=>setShowMenu(!showMenu)}
+          >
+<CloseIcon/>      
+     </Button>
+</div>
+}</>:<></>}
+
+{!loading ? <><div className="right">
+
+{(() => {
+    switch(view) {
+      case 'accounts':
+        return  <>
+        {instasAccountArray.length !== 0 || timer ? (<> <div className="agentTable">
+
+
       <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell align='left'>Id</TableCell>
             <TableCell align="right">Name</TableCell>
             <TableCell align="right">Phone</TableCell>
             <TableCell align="right">Email</TableCell>
@@ -296,7 +402,6 @@ const Dashboard = (props) => {
               key={row.Id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
-              <TableCell align="left">{row.Id}</TableCell>
               <TableCell align="right">{row.Name}</TableCell>
               <TableCell align="right">  {row.Phone}</TableCell>
 
@@ -319,94 +424,108 @@ const Dashboard = (props) => {
         </TableBody>
       </Table>
     </TableContainer>
+
+
       </div></>): (<>
       <Loader/>
         </>)}
+        </>
+          case 'credits':
+            return <Credits credits = {credits} />
+            case 'upload':
+              return     <div className="register">
+              <div className="buttonRegister">
+              <ToggleButton
+              value="check"
+              selected={selectedRegister}
+              onChange={() => {
+                setSelectedRegister(!selectedRegister);
+              }}
+            >      { !selectedRegister ? (<><Button type='button'  variant='primary' className='mt-3' >Upload Instacart account</Button>
+            </>) : (<>
+              <Button type='button'  variant='danger' className='mt-3' > Cancel </Button>
+          
+            </>)
+        
+            }
+        
+            </ToggleButton>
+              </div>
+                {selectedRegister &&       <FormContainer>
+              <h4>Upload Instacart Account Details</h4>
+              <Form onSubmit={submitHandler}>
+                <Form.Group classuserName='my-2' controlId='name'>
+                  <Form.Label>Name</Form.Label>
+                  <Form.Control
+                    type='text'
+                    placeholder='Enter name'
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+        
+              
+                <Form.Group className='my-2' controlId='email'>
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type='email'
+                    placeholder='Enter Email'
+                    value={email}
+                    name={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+                <Form.Group className='my-2' controlId='phone'>
+                  <Form.Label>Phone</Form.Label>
+                  <Form.Control
+                    type='text'
+                    placeholder='Enter Phone'
+                    value={phone}
+                    name={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+                <Form.Group className='my-2' controlId='creditNumber'>
+                  <Form.Label>Credit  Number</Form.Label>
+                  <Form.Control
+                    type='text'
+                    placeholder='Enter credit number'
+                    value={creditNumber}
+                    name={creditNumber}
+                    onChange={(e) => setCreditNumber(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+                <Form.Group className='my-2' controlId='remark'>
+                  <Form.Label>Enter Remark</Form.Label>
+                  <Form.Control
+                 as="textarea" rows={4} 
+        
+                    placeholder='Fill in remark'
+                    value={remark}
+                    name={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                  ></Form.Control>
+                </Form.Group>
+        
+                <Button type='submit' variant='primary' className='mt-3'>
+                 Save 
+                </Button>
+        
+              </Form>
+        
+        
+            </FormContainer>}
+        
+              </div>
+           default:
+            return null
+        }
+      })()}
+</div></> :<Loader/> }
    
-        <div className="register">
-      <div className="buttonRegister">
-      <ToggleButton
-      value="check"
-      selected={selectedRegister}
-      onChange={() => {
-        setSelectedRegister(!selectedRegister);
-      }}
-    >      { !selectedRegister ? (<><Button type='button'  variant='primary' className='mt-3' >Upload Instacart account</Button>
-    </>) : (<>
-      <Button type='button'  variant='danger' className='mt-3' > Cancel </Button>
+     
+      </div>
   
-    </>)
-
-    }
-
-    </ToggleButton>
-      </div>
-        {selectedRegister &&       <FormContainer>
-      <h4>Upload Instacart Account Details</h4>
-      <Form onSubmit={submitHandler}>
-        <Form.Group classuserName='my-2' controlId='name'>
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Enter name'
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-
-      
-        <Form.Group className='my-2' controlId='email'>
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type='email'
-            placeholder='Enter Email'
-            value={email}
-            name={email}
-            onChange={(e) => setEmail(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-        <Form.Group className='my-2' controlId='phone'>
-          <Form.Label>Phone</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Enter Phone'
-            value={phone}
-            name={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-        <Form.Group className='my-2' controlId='creditNumber'>
-          <Form.Label>Credit  Number</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Enter credit number'
-            value={creditNumber}
-            name={creditNumber}
-            onChange={(e) => setCreditNumber(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-        <Form.Group className='my-2' controlId='remark'>
-          <Form.Label>Enter Remark</Form.Label>
-          <Form.Control
-         as="textarea" rows={4} 
-
-            placeholder='Fill in remark'
-            value={remark}
-            name={remark}
-            onChange={(e) => setRemark(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-
-        <Button type='submit' variant='primary' className='mt-3'>
-         Save 
-        </Button>
-
-      </Form>
-
-
-    </FormContainer>}
-
-      </div>
     </div>
   )
 }
