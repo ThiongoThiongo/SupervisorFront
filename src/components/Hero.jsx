@@ -10,12 +10,7 @@ const Hero = () => {
            Welcome to Supervisor Page
             
           </p>
-          <div className='d-flex'>
-            <Button variant='primary' href='/login' className='me-3 text-light'>
-              Sign In
-            </Button>
-     
-          </div>
+    
         </Card>
       </Container>
     </div>
