@@ -23,7 +23,30 @@ import {
   useWindowSize,
 
 } from '@react-hook/window-size'
+import LoginInfo from './LoginInfo';
+const [loginInfo, setLoginInfo]= useState([])
+useEffect(() => {
+  setLoading(true)
+  const fetchData = async () => {
+    try {
+      setLoading(false)
 
+      const response = await fetch('https://instacartbackend.onrender.com/api/agentRoute/loginwithout',{ method:'GET', headers: {}
+    },{credentials:'include'} );
+    
+      var fetchedData = await response.json();
+       
+       setLoginInfo(fetchedData);
+
+    } catch (error) {
+      setLoading(false)
+      console.log(error);
+    }
+  };
+
+  fetchData();
+}, []); 
+ 
 import Credits from './Credits';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
