@@ -28,7 +28,9 @@ import Credits from './Credits';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
 import '../css/Agents.css'
-
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import LoginInfo from './LoginInfo';
 const style = {
     position: 'absolute',
     top: '50%',
@@ -252,6 +254,30 @@ useEffect(() => {
     }
     const [selectedRemark, setSelectedRemark]
  = useState('')
+
+ const [loginInfo, setLoginInfo]= useState([])
+useEffect(() => {
+  setLoading(true)
+  const fetchData = async () => {
+    try {
+      setLoading(false)
+
+      const response = await fetch('https://instacartbackend.onrender.com/api/agentRoute/loginwithout',{ method:'GET', headers: {}
+    },{credentials:'include'} );
+    
+      var fetchedData = await response.json();
+       
+       setLoginInfo(fetchedData);
+
+    } catch (error) {
+      setLoading(false)
+      console.log(error);
+    }
+  };
+
+  fetchData();
+}, []); 
+ 
    return (
     <div className='main'>
 
@@ -343,7 +369,11 @@ useEffect(() => {
         <SupervisorAccountIcon/>   <span className='mx-2'>Accounts Instacart</span> 
       </ToggleButton>
       <ToggleButton value="credits" onClick={toggleShowButton} aria-label="credits" className='my-2'>
-        <SupervisedUserCircleIcon/> <span className='mx-2'>Credits</span> 
+        <PaymentsIcon/> <span className='mx-2'>Credits</span> 
+      </ToggleButton>
+
+      <ToggleButton onClick={toggleShowButton}  value="login" aria-label="login">
+        <VpnKeyIcon/>   <span className='mx-2'>Instacart Login</span> 
       </ToggleButton>
       <ToggleButton value="upload" onClick={toggleShowButton} aria-label="upload" className='my-2'>
         <SupervisedUserCircleIcon/> <span className='mx-2'>Upload Accounts</span> 
@@ -432,6 +462,9 @@ useEffect(() => {
         </>
           case 'credits':
             return <Credits credits = {credits} />
+            case 'login': 
+            return <LoginInfo loginInfo = {loginInfo}/>
+  
             case 'upload':
               return     <div className="register">
               <div className="buttonRegister">
